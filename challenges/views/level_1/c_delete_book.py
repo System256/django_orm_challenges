@@ -7,14 +7,16 @@
 и убедитесь, что книга удалена.
 """
 from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, HttpResponseNotAllowed
-
+from django.core.exceptions import ObjectDoesNotExist
 from challenges.models import Book
 from challenges.views.level_1.b_book_details import get_book
 
 
 def delete_book(book_id: int) -> Book | None:
-    # код писать тут
-    pass
+    try:
+        return Book.objects.get(id=book_id).delete()
+    except ObjectDoesNotExist:
+        return None
 
 
 def delete_book_handler(request: HttpRequest, book_id: int) -> HttpResponse:
