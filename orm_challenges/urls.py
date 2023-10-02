@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
 
 from challenges.views.level_1.a_create_book import create_book_handler
 from challenges.views.level_1.b_book_details import book_details_handler
@@ -27,3 +28,9 @@ urlpatterns = [
     path('posts/by-categories/', categories_posts_list_view),
     path('posts/last-published/', last_days_posts_list_view),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
