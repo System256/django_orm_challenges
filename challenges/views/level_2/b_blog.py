@@ -82,7 +82,8 @@ def last_days_posts_list_view(request: HttpRequest) -> JsonResponse:
         last_days = request.GET.get('last_days')
 
         last_days_posts = (Post.objects\
-            .filter(published_in__gte=timezone.now() - timedelta(days=int(last_days))))
+            .filter(published_in__gte=timezone.now() - timedelta(days=int(last_days))))\
+            .filter(status='pub')
         return sterilize_and_response(last_days_posts)
     
     return is_not_get_request()
