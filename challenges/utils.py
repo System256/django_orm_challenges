@@ -9,7 +9,7 @@ def to_json(obj: models.Model) -> str:
     return serialized_obj
 
 
-def sterilize_and_response(query_set: QuerySet) -> JsonResponse:
+def serialize_and_response(query_set: QuerySet) -> JsonResponse:
     sterilized_query_set = [to_json(object) for object in query_set]
     return JsonResponse(sterilized_query_set, safe=False)
 

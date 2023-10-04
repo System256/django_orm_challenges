@@ -14,7 +14,7 @@
 from django.http import HttpRequest, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from challenges.models import Laptop
-from challenges.utils import to_json, sterilize_and_response, is_not_get_request
+from challenges.utils import to_json, serialize_and_response, is_not_get_request
 
 
 def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse | Http404:
@@ -31,8 +31,8 @@ def laptop_in_stock_list_view(request: HttpRequest) -> JsonResponse:
     В этой вьюхе вам нужно вернуть json-описание всех ноутбуков, которых на складе больше нуля.
     Отсортируйте ноутбуки по дате добавления, сначала самый новый.
     """
-    laptops_in_stock = Laptop.objects.filter(quantity_in_stock__gt=0).order_by('added_date')
-    return sterilize_and_response(laptops_in_stock)
+    laptops_in_stock = Laptop.objects.filter(quantity_in_stock__gt=0).order_by('created_at')
+    return serialize_and_response(laptops_in_stock)
 
 
 def laptop_filter_view(request: HttpRequest) -> JsonResponse:
@@ -52,7 +52,7 @@ def laptop_filter_view(request: HttpRequest) -> JsonResponse:
             return JsonResponse({'error': f'{brand} brand is not in our database or the price is negative'}, status=403)
 
         laptops_brand_min_price = Laptop.objects.filter(brand=brand, price__gt=min_price).order_by('price')
-        return sterilize_and_response(laptops_brand_min_price)
+        return serialize_and_response(laptops_brand_min_price)
     
     return is_not_get_request()
 

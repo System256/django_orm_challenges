@@ -13,7 +13,7 @@ from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.db.models import Q
 from challenges.models import Post
-from challenges.utils import sterilize_and_response, request_not_be_empty, is_not_get_request
+from challenges.utils import serialize_and_response, request_not_be_empty, is_not_get_request
 from datetime import timedelta
 
 
@@ -22,7 +22,7 @@ def last_posts_list_view(request: HttpRequest) -> JsonResponse:
     В этой вьюхе вам нужно вернуть 3 последних опубликованных поста.
     """
     last_posts = Post.objects.all().order_by('published_in')[:3]
-    return sterilize_and_response(last_posts)
+    return serialize_and_response(last_posts)
 
 
 def posts_search_view(request: HttpRequest) -> JsonResponse:
@@ -34,10 +34,15 @@ def posts_search_view(request: HttpRequest) -> JsonResponse:
     if request.method == 'GET':
         search_query = request.GET.get('query')
 
-        if len(search_query) > 0:
-            posts_search = (Post.objects\
-                            .filter(Q(title__icontains=search_query) | Q(text__icontains=search_query)))
-            return sterilize_and_response(posts_search)
+        if search_query:
+            posts_search = (
+                Post.objects
+                .filter(
+                    Q(title__icontains=search_query) |
+                      Q(text__icontains=search_query)
+                )
+            )
+            return serialize_and_response(posts_search)
         
         return request_not_be_empty()
 
@@ -53,7 +58,7 @@ def untagged_posts_list_view(request: HttpRequest) -> JsonResponse:
                         .filter(category__exact='')\
                         .order_by('authors_name')\
                         .order_by('created_at'))
-    return sterilize_and_response(untagged_posts)
+    return serialize_and_response(untagged_posts)
 
 
 def categories_posts_list_view(request: HttpRequest) -> JsonResponse:
@@ -66,7 +71,7 @@ def categories_posts_list_view(request: HttpRequest) -> JsonResponse:
 
         if len(categories) > 0:
             categories_posts = Post.objects.filter(category__in=categories)
-            return sterilize_and_response(categories_posts)
+            return serialize_and_response(categories_posts)
 
         return request_not_be_empty()
     
@@ -84,6 +89,6 @@ def last_days_posts_list_view(request: HttpRequest) -> JsonResponse:
         last_days_posts = (Post.objects\
             .filter(published_in__gte=timezone.now() - timedelta(days=int(last_days))))\
             .filter(status='pub')
-        return sterilize_and_response(last_days_posts)
+        return serialize_and_response(last_days_posts)
     
     return is_not_get_request()
