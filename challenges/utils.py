@@ -9,14 +9,14 @@ def to_json(obj: models.Model) -> str:
     return serialized_obj
 
 
-def serialize_and_response(query_set: QuerySet) -> JsonResponse:
-    sterilized_query_set = [to_json(object) for object in query_set]
-    return JsonResponse(sterilized_query_set, safe=False)
+def queryset_to_json_response(query_set: QuerySet) -> JsonResponse:
+    serialized_query_set = [to_json(object) for object in query_set]
+    return JsonResponse(serialized_query_set, safe=False)
 
 
-def is_not_get_request() -> JsonResponse:
-    return JsonResponse({'error': 'The response is available only via a GET request.'})
+def method_get_error_response() -> JsonResponse:
+    return JsonResponse({'error': 'The response is available only via a GET request.'}, status=403)
 
 
 def request_not_be_empty() -> JsonResponse:
-    return JsonResponse({'error': 'The request cannot be empty. Enter a request.'})
+    return JsonResponse({'error': 'The request cannot be empty. Enter a request.'}, status=404)

@@ -14,7 +14,7 @@
 from django.http import HttpRequest, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from challenges.models import Laptop
-from challenges.utils import to_json, serialize_and_response, is_not_get_request
+from challenges.utils import to_json, queryset_to_json_response, method_get_error_response
 
 
 def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse | Http404:
@@ -32,7 +32,7 @@ def laptop_in_stock_list_view(request: HttpRequest) -> JsonResponse:
     Отсортируйте ноутбуки по дате добавления, сначала самый новый.
     """
     laptops_in_stock = Laptop.objects.filter(quantity_in_stock__gt=0).order_by('created_at')
-    return serialize_and_response(laptops_in_stock)
+    return queryset_to_json_response(laptops_in_stock)
 
 
 def laptop_filter_view(request: HttpRequest) -> JsonResponse:
@@ -46,15 +46,15 @@ def laptop_filter_view(request: HttpRequest) -> JsonResponse:
         brand = request.GET.get('brand')
         min_price = request.GET.get('min_price')
 
-        laptops_brand = Laptop.objects.filter(brand=brand).exists()
+        is_exists_laptop_brand = Laptop.objects.filter(brand=brand).exists()
         
-        if not laptops_brand or int(min_price) < 0:
+        if not is_exists_laptop_brand or int(min_price) < 0:
             return JsonResponse({'error': f'{brand} brand is not in our database or the price is negative'}, status=403)
 
         laptops_brand_min_price = Laptop.objects.filter(brand=brand, price__gt=min_price).order_by('price')
-        return serialize_and_response(laptops_brand_min_price)
+        return queryset_to_json_response(laptops_brand_min_price)
     
-    return is_not_get_request()
+    return method_get_error_response()
 
 
 def last_laptop_details_view(request: HttpRequest) -> JsonResponse:
